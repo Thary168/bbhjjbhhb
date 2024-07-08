@@ -1,12 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Freehand&family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&family=Noto+Sans+Khmer&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khmer to Latin Transliteration</title>
     <style>
+        // <uniquifier>: Use a unique and descriptive class name
+        // <weight>: Use a value from 100 to 700
+
+        .kantumruy-pro-<uniquifier> {
+        font-family: "Kantumruy Pro", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: <weight>;
+        font-style: normal;
+        }
         body,button,textarea,#inputText{
-            font-family:Khmer OS Content;
+            font-family: "Kantumruy Pro", sans-serif;
             font-size: 25px;
         }
         .container {
@@ -20,7 +32,7 @@
         }
         h1 {
             text-align: center;
-            color:  #6499de;
+            color: palevioletred;
             margin-bottom: 20px;
         }
         textarea {
@@ -45,14 +57,14 @@
             padding: 10px 20px;
             font-size: 25px;
             cursor: pointer;
-            border: 3px solid #333;
-            border-radius: 25px;
+            border: 1px solid palevioletred;
+            border-radius: 10px;
             background-color: #ffffff;
             color: black;
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color:#90b5e6;
+            background-color:palevioletred;
         }
         button:active {
             background-color: #172c5a;
@@ -94,8 +106,7 @@
         <textarea class="output" id="outputText"></textarea>
         <div id="trxt">
           
-          <p id="text">🙏កម្មវិធីនៅមិនទាន់ពេញលក្ខណៈគ្រប់ជ្រុងជ្រោយនៅឡើយ ជាពិសេសគឺការបកប្រែពីឡាតាំង មកខ្មែរនោះតែម្តង🙏</p>    
-          <h3 id="head"> កែសម្រួលដោយ ថារី🙂</h3>
+          <p id="text">Versoin 1.0</p>    
         </div>
     <script>
         let mode = 'khmerToLatin';
@@ -192,76 +203,65 @@
         };
          
         function transliterate() {
-            const inputText = document.getElementById('inputText').value;
-            const outputText = document.getElementById('outputText');
-            if (mode === 'khmerToLatin') {
-                outputText.innerText = transliterateKhmerToLatin(inputText);
-            } else {
-                outputText.innerText = transliterateLatinToKhmer(inputText);
-            }
-        }
+    const inputText = document.getElementById('inputText').value;
+    const outputText = document.getElementById('outputText');
+    if (mode === 'khmerToLatin') {
+        outputText.value = transliterateKhmerToLatin(inputText);
+    } else {
+        outputText.value = transliterateLatinToKhmer(inputText);
+    }
+}
 
-        function transliterateKhmerToLatin(text) {
-            let result = text;
-            for (const [key, value] of Object.entries(specialWordsKhmerToLatin)) {
-                result = result.replace(new RegExp(key, 'g'), value);
-            }
-            for (const [key, value] of Object.entries(khmerToLatinConsonantMap)) {
-                result = result.replace(new RegExp(key, 'g'), value);
-            }
-            for (const [key, value] of Object.entries(khmerToLatinVowelMap)) {
-                result = result.replace(new RegExp(key, 'g'), value);
-            }
-            return result;
-        }
+function transliterateKhmerToLatin(text) {
+    let result = text;
+    for (const [key, value] of Object.entries(specialWordsKhmerToLatin)) {
+        result = result.replace(new RegExp(key, 'g'), value);
+    }
+    for (const [key, value] of Object.entries(khmerToLatinConsonantMap)) {
+        result = result.replace(new RegExp(key, 'g'), value);
+    }
+    for (const [key, value] of Object.entries(khmerToLatinVowelMap)) {
+        result = result.replace(new RegExp(key, 'g'), value);
+    }
+    return result;
+}
 
-        function transliterateLatinToKhmer(text) {
-            let result = text;
-            for (const [key, value] of Object.entries(specialWordsLatinToKhmer)) {
-                result = result.replace(new RegExp(key, 'g'), value);
-            }
-            for (const [key, value] of Object.entries(latinToKhmerConsonantMap)) {
-                result = result.replace(new RegExp(key, 'g'), value);
-            }
-            for (const [key, value] of Object.entries(latinToKhmerVowelMap)) {
-                result = result.replace(new RegExp(key, 'g'), value);
-            }
-            return result;
-        }
+function transliterateLatinToKhmer(text) {
+    let result = text;
+    for (const [key, value] of Object.entries(specialWordsLatinToKhmer)) {
+        result = result.replace(new RegExp(key, 'g'), value);
+    }
+    for (const [key, value] of Object.entries(latinToKhmerConsonantMap)) {
+        result = result.replace(new RegExp(key, 'g'), value);
+    }
+    for (const [key, value] of Object.entries(latinToKhmerVowelMap)) {
+        result = result.replace(new RegExp(key, 'g'), value);
+    }
+    return result;
+}
 
-        function clearText() {
-            document.getElementById('inputText').value = '';
-            document.getElementById('outputText').innerText = '';
-        }
+function clearText() {
+    document.getElementById('inputText').value = '';
+    document.getElementById('outputText').value = '';
+}
 
-        function switchMode() {
-            if (mode === 'khmerToLatin') {
-                mode = 'latinToKhmer';
-                document.querySelector('h1').innerText = 'ឡាតាំង ទៅ ខ្មែរ';
-            } else {
-                mode = 'khmerToLatin';
-                document.querySelector('h1').innerText = 'ខ្មែរ ទៅ ឡាតាំង';
-            }
-            clearText();
-        }
-        function copyText() {
-            const outputText = document.getElementById('outputText');
-            const textToCopy = outputText.innerText;
-            
-            // បង្កើតវាវិញប្រើអនុគមន៍ទៅចម្លងអត្ថបទ
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = textToCopy;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-    
-    // ប្ដូរអត្ថបទលើប៊ូតុង
-    //const copyButton = document.querySelector('button:nth-child(1)');
-   // copyButton.innerText = 'បានចម្លង!';
-   // setTimeout(() => {
-   //     copyButton.innerText = 'ចម្លងអត្ថបទ';
-   // }, 1500);
+function switchMode() {
+    if (mode === 'khmerToLatin') {
+        mode = 'latinToKhmer';
+        document.querySelector('h1').innerText = 'ឡាតាំង ទៅ ខ្មែរ';
+    } else {
+        mode = 'khmerToLatin';
+        document.querySelector('h1').innerText = 'ខ្មែរ ទៅ ឡាតាំង';
+    }
+    clearText();
+}
+
+function copyText() {
+    const outputText = document.getElementById('outputText');
+    outputText.select();
+    outputText.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand('copy');
+    alert('Copied to clipboard');
 }
     </script>
 </body>
