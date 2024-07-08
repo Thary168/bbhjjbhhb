@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khmer to Latin Transliteration</title>
+    <style>
+        body,button,textarea,#inputText{
+            font-family:Khmer OS Content;
+            font-size: 25px;
+        }
+        .container {
+            background-color: #f1f1f1;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* max-width: 600px; */
+            /* width: 80%; */
+           margin: 2%;
+        }
+        h1 {
+            text-align: center;
+            color:  #6499de;
+            margin-bottom: 20px;
+        }
+        textarea {
+            padding: 18px;
+            background-color: #f4f4f4;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            font-size: 25px;
+            color: #333;
+            min-height: 50px;
+            margin-bottom: 10px;
+            width: 97%;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 25px;
+            cursor: pointer;
+            border: 3px solid #333;
+            border-radius: 25px;
+            background-color: #ffffff;
+            color: black;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color:#90b5e6;
+        }
+        button:active {
+            background-color: #172c5a;
+        }
+       
+        .output {
+            padding: 12px;
+            background-color: #f4f4f4;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            font-size: 25px;
+            color: #333;
+            min-height: 50px;
+            margin-top: 10px;
+            width: 97%;
+           
+        }
+        #trxt  {
+           color :black;
+           text-align: center;
+           margin-bottom: 20px;
+        }
+        #head  {
+            color: black;
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ខ្មែរ ទៅ ឡាតាំង</h1>
+        <textarea id="inputText" rows="4" placeholder="សរសេរកន្លែងនេះ..."></textarea>
+        <div>
+            <button onclick="transliterate()">បកប្រែ</button>
+            <button onclick="clearText()">សម្អាត</button>
+            <button onclick="switchMode()">ប្តូរភាសា</button>
+            <button onclick="copyText()">ចម្លង</button>
+        </div>
+        <textarea class="output" id="outputText"></textarea>
+        <div id="trxt">
+          
+          <p id="text">🙏កម្មវិធីនៅមិនទាន់ពេញលក្ខណៈគ្រប់ជ្រុងជ្រោយនៅឡើយ ជាពិសេសគឺការបកប្រែពីឡាតាំង មកខ្មែរនោះតែម្តង🙏</p>    
+          <h3 id="head"> កែសម្រួលដោយ ថារី🙂</h3>
+        </div>
+    <script>
+        let mode = 'khmerToLatin';
+
+        const khmerToLatinConsonantMap = {
+                'ក': 'k', 'ខ': 'kh', 'គ': 'kh', 'ឃ': 'gh', 'ង': 'ng',
+                'ច': 'j', 'ឆ': 'chh', 'ជ': 'j', 'ឈ': 'jh', 'ញ': 'nh',
+                'ដ': 'd', 'ឋ': 't', 'ឌ': 'dh', 'ឍ': 'th', 'ណ': 'n',
+                'ត': 't', 'ថ': 'th', 'ទ': 't', 'ធ': 'th', 'ន': 'n',
+                'ប': 'b', 'ផ': 'ph', 'ព': 'p', 'ភ': 'ph', 'ម': 'm',
+                'យ': 'y', 'រ': 'r', 'ល': 'l', 'វ': 'v', 'ស': 's',
+                'ហ': 'h', 'ឡ': 'l', 'អ': 'a', '្': "'"
+        };
+
+        const khmerToLatinVowelMap = {
+            'ា': 'a', 'ិ': 'i', 'ី': 'ii', 'ឹ': 'eu', 'ឺ': 'euu',
+            'ុ': 'u', 'ូ': 'o', 'ួ': 'ua', 'ើ': 'oe', 'ឿ': 'oeu',
+            'ៀ': 'ie', 'េ': 'e', 'ែ': 'e', 'ៃ': 'ai', 'ោ': 'ou',
+            'ៅ': 'au', 'ំ': 'm', 'ះ': 'h', '៉': '', '៊': '',
+            '់': '', '៌': '', '៍': '', '៎': '', '៏': '', '័': '',
+            'ៈ': 'a', '៉': 'q', '៊': 'w', '់': 'x', '៌': 'y',
+            '៍': 'z', '៎': 'zz', '៏': 'x', '័': 'x', '។': '.',
+            '៕': '.', '៖': ':', 'ៗ': '2', '៘': '', '៙': '',
+            '៚': '', '៛': '', 'ៜ': '', '៝': '', '០': '0', '១': '1',
+            '២': '2', '៣': '3', '៤': '4', '៥': '5', '៦': '6', '៧': '7',
+            '៨': '8', '៩': '9'
+        };
+
+        const specialWordsKhmerToLatin = {
+            'ចា':"jah ",'បាទ':"bart ",'បាត':"bart ",'បា':"bah ",
+            'តោះ':"tos ",'ទោះ':"tus ",'និង':"ng ",'នឹង':"ng ",
+            'ហ្នឹង':"ng ",'ហើយ':"hx ",'មែន':"men ",'មេន':"men ",
+            'តេ':"te ",'ទេ':"te ",'អី':"ey ",'មិន':"min ",
+            'ដើរ':"der ",'មោះ':"mos ",'ខុស':"khos ",'ស្លាប់':"slab",
+            'ងាប់':"ngob ",'ងូត':"nguk ",'ទឹក':"terk ",'ងងុយ':"nguy",
+            'ងុយ':"nguy ",'ត្រូវ':"trov ",'ឌឺ':"due ",'ស្រលាញ់':"sl",
+            'ស្រឡាញ់':"srolanh ",'នៅ':"nv ",'នូវ':"nov ",'តុក្កតា':"tokata",
+            'ស៊ី':"cii ",'ញ៉ាំ':"nham ",'បាយ':"bay ",'និយាយ':"yay",
+            'យាយ':"yy ",'ហូប':"hob ",'ដេក':"dek ",'គេង':"keng",
+            'សក់':"sok ",'ក្បាល':"kbal ",'ជើង':"jerng ",'ដៃ':"dai",
+            'ចាន':"jan ",'លាន':"leang ",'លេង':"lg ",'ធ្វើ':"tver",
+            'កំពុង':"kpg ",'ផង':"png ",'អាចម៍':"ach ",'ឆ្កួត':"chhkut",
+            'ឡប់':"lop ",'យូរ':"yu ",'គេ':"ke ",'ញុម':"nh ",
+            'អង្គុយ':"kuy ",'ផ្ទះ':"pteas ",'ម្នាក់':"mneak ",'នោះ':"nus ",
+            'ស្អាត':"sart ",'កុំ':"kom ",'ឈប់':"chop ",'អាច':"arch ",
+            'ម៉ូតូ':"moto ",'ឆ្កែ':"chkea ",'ឆ្មា':"chma ",'ម៉ែ':"mae ",
+            'ឪ':"ov ",'ថារី': "thary ",'ចុយ': "juii ",'អា': "ah ",'កូន':"kon ",'សិន':"sin ",
+            'ជៀ':"jer ",'វា':"vea ",'ដឹង':"kon ",'នេះ':"nes ",'ឈឺ':"chher ",'ពេល':"pel ",'សួរ':"sur ",
+            'ជក់':"juk ",'នុង':"kung ",'ក្រោយ':"kroy ",'ចប់':"job ",'ថ្មី':"th'May ",'ជារឿងខ្ញុំ':"Chea rg k'nh ",'បងថ្លៃ':"B t'lay ",
+            'ប៉ា':"pa ",'ហរ':"hrr ",'ស្នេហ៍':"snea ",'រៀន':"rean ",'ស្រី':"srey ",'យើង':"yg ",'ហាម':"ham ",'បេប៊ី':"bbe ",
+            'ឯង':"Eng ",'នោះៗ':"nos2 ",'តូច':"toch ",'យាត់':"yath ",'យ័ត្ន':"yath ",'ទៀត':"tt ",'ប្រុស':"bozz ",'អោយ':"oy ",
+            'ឱ្យ':"oy ",'ខ្លះ':"klas ",'សាំ':"sam ",'យឺ':"yii ",'អរ':"orr ",'លូវ':"lov ",'ឡូវ':"lov ",'ការជ្រូក':"kajurk ",
+            'ល្អ':"laor ",'ឈ្មោះ':"chmus ",'សត់':"sot ",'ម៉ាក់':"muk ",'ពីរ':"pi ",'ហេរ':"he ",'ខ្លាំងៗ':"khang2 ",'គ្នា':"knea ",'បែក':"bek ",
+            'អស់':"os ",'ក៏':"krr ",'សម្លាញ់':"sml ",'មួយ':"muy ",'ចុម':"jom ",'មើល':"merl ",'មិត្ត':"mit ",'ដាក់':"dak ",'អន់':"orn ",
+            'ខឹង':"khg ",'ស្អប់':"saob ",'ហែង':"hg ",'សង្សារ':"ss ",'ថើម':"terb ",'សើច':"serj ",'ចេះ':"ches ",
+            'យឺត':"yert ",'ដំបូង':"t'bong ",'ឡប់':"lob "
+        };
+
+        const latinToKhmerConsonantMap = {
+            'k': 'ក', 'kh': 'ខ', 'g': 'គ', 'gh': 'ឃ', 'ng': 'ង',
+            'ch': 'ច', 'chh': 'ឆ', 'j': 'ជ', 'jh': 'ឈ', 'nh': 'ញ',
+            'd': 'ដ', 't': 'ត', 'th': 'ថ', 'dh': 'ធ', 'n': 'ន',
+            'b': 'ប', 'ph': 'ផ', 'p': 'ព', 'm': 'ម', 'y': 'យ',
+            'r': 'រ', 'l': 'ល', 'v': 'វ', 's': 'ស', 'h': 'ហ',
+            'l': 'ឡ', 'a': 'អ'
+        };
+
+        const latinToKhmerVowelMap = {
+   // 'a': 'ា', 'i': 'ិ', 'ii': 'ី', 'eu': 'ឹ', 'euu': 'ឺ',
+    'u': 'ុ', 'uu': 'ូ', 'ua': 'ួ', 'oe': 'ើ', 'oeu': 'ឿ',
+    'ie': 'ៀ', 'e': 'េ', 'ae': 'ែ', 'ai': 'ៃ', 'o': 'ោ',
+    'au': 'ៅ', 'm': 'ំ', 'h': 'ះ', 'q': '៉', 'w': '៊',
+    'x': '់', 'y': '៌', 'z': '៍', 'zz': '៎', 'x': '័',
+ //   '.': '។', 
+  //  ':': '៖', '2': 'ៗ'
+        };
+
+        const specialWordsLatinToKhmer = {
+            'jah': 'ចា', 'bart': 'បាទ', 'bah': 'បា', 'tos': 'តោះ', 'tus': 'ទោះ',
+            'ng': 'និង', 'hx': 'ហើយ', 'men': 'មែន', 'te': 'តេ', 'ey': 'អី',
+            'min': 'មិន', 'der': 'ដើរ', 'mos': 'មោះ', 'khos': 'ខុស', 'slab': 'ស្លាប់',
+            'ngob': 'ងាប់', 'nguk': 'ងូត', 'terk': 'ទឹក', 'nguy': 'ងងុយ', 'trov': 'ត្រូវ', 'due': 'ឌឺ',
+            'sl': 'ស្រលាញ់', 'srolanh': 'ស្រឡាញ់', 'nv': 'នៅ', 'nov': 'នូវ',
+            'tokata': 'តុក្កតា', 'cii': 'ស៊ី', 'nham': 'ញ៉ាំ', 'bay': 'បាយ',
+            'yay': 'និយាយ', 'yy': 'យាយ', 'hob': 'ហូប', 'dek': 'ដេក',
+            'keng': 'គេង', 'sok': 'សក់', 'kbal': 'ក្បាល', 'jerng': 'ជើង',
+            'dai': 'ដៃ', 'jan': 'ចាន', 'leang': 'លាន', 'lg': 'លេង',
+            'tver': 'ធ្វើ', 'kpg': 'កំពុង', 'png': 'ផង', 'ach': 'អាចម៍',
+            'chhkut': 'ឆ្កួត', 'lop': 'ឡប់', 'yu': 'យូរ', 'ke': 'គេ',
+            'nh': 'ញុម', 'kuy': 'អង្គុយ', 'pteas': 'ផ្ទះ', 'mneak': 'ម្នាក់',
+            'nus': 'នោះ', 'sart': 'ស្អាត', 'kom': 'កុំ', 'chop': 'ឈប់',
+            'arch': 'អាច', 'moto': 'ម៉ូតូ', 'chkea': 'ឆ្កែ', 'chma': 'ឆ្មា',
+            'mae': 'ម៉ែ', 'ov': 'ឪ'
+        };
+         
+        function transliterate() {
+            const inputText = document.getElementById('inputText').value;
+            const outputText = document.getElementById('outputText');
+            if (mode === 'khmerToLatin') {
+                outputText.innerText = transliterateKhmerToLatin(inputText);
+            } else {
+                outputText.innerText = transliterateLatinToKhmer(inputText);
+            }
+        }
+
+        function transliterateKhmerToLatin(text) {
+            let result = text;
+            for (const [key, value] of Object.entries(specialWordsKhmerToLatin)) {
+                result = result.replace(new RegExp(key, 'g'), value);
+            }
+            for (const [key, value] of Object.entries(khmerToLatinConsonantMap)) {
+                result = result.replace(new RegExp(key, 'g'), value);
+            }
+            for (const [key, value] of Object.entries(khmerToLatinVowelMap)) {
+                result = result.replace(new RegExp(key, 'g'), value);
+            }
+            return result;
+        }
+
+        function transliterateLatinToKhmer(text) {
+            let result = text;
+            for (const [key, value] of Object.entries(specialWordsLatinToKhmer)) {
+                result = result.replace(new RegExp(key, 'g'), value);
+            }
+            for (const [key, value] of Object.entries(latinToKhmerConsonantMap)) {
+                result = result.replace(new RegExp(key, 'g'), value);
+            }
+            for (const [key, value] of Object.entries(latinToKhmerVowelMap)) {
+                result = result.replace(new RegExp(key, 'g'), value);
+            }
+            return result;
+        }
+
+        function clearText() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').innerText = '';
+        }
+
+        function switchMode() {
+            if (mode === 'khmerToLatin') {
+                mode = 'latinToKhmer';
+                document.querySelector('h1').innerText = 'ឡាតាំង ទៅ ខ្មែរ';
+            } else {
+                mode = 'khmerToLatin';
+                document.querySelector('h1').innerText = 'ខ្មែរ ទៅ ឡាតាំង';
+            }
+            clearText();
+        }
+        function copyText() {
+            const outputText = document.getElementById('outputText');
+            const textToCopy = outputText.innerText;
+            
+            // បង្កើតវាវិញប្រើអនុគមន៍ទៅចម្លងអត្ថបទ
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+    
+    // ប្ដូរអត្ថបទលើប៊ូតុង
+    //const copyButton = document.querySelector('button:nth-child(1)');
+   // copyButton.innerText = 'បានចម្លង!';
+   // setTimeout(() => {
+   //     copyButton.innerText = 'ចម្លងអត្ថបទ';
+   // }, 1500);
+}
+    </script>
+</body>
+</html>
